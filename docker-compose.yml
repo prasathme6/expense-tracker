@@ -1,0 +1,32 @@
+networks:
+  mynets:
+    driver: bridge
+
+volumes:
+  db_data:
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - mynets
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks: 
+      - mynets 
+  database:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootroot
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - mynets
