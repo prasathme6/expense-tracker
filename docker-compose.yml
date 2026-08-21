@@ -13,6 +13,7 @@ services:
       - backend
     networks:
       - mynets
+
   backend:
     build: ./backend
     ports:
@@ -21,12 +22,16 @@ services:
       - database
     networks: 
       - mynets 
+
   database:
     image: postgres:18
     environment:
+      POSTGRES_DB: expensetracker
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: rootroot
+    ports:
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     networks:
       - mynets
