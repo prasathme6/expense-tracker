@@ -19,7 +19,7 @@ import com.expense.tracker.dto.ExpenseCategoryResponse;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost")
 public class TrackerController {
 	
 	@Autowired

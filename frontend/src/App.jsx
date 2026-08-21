@@ -44,7 +44,7 @@ function App() {
   const getExpenses = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8080/api/all"
+        "/api/all"
       );
 
       if (!response.ok) {
@@ -65,7 +65,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/all",
+        "/api/all",
         {
           method: "POST",
 
@@ -109,7 +109,7 @@ function App() {
   const deleteExpense = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/del/${id}`,
+        `/api/del/${id}`,
         {
           method: "DELETE"
         }
@@ -146,7 +146,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/cat?cat=${encodeURIComponent(category)}`
+        `/api/cat?cat=${encodeURIComponent(category)}`
       );
 
       if (!response.ok) {
@@ -173,7 +173,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/pay?pay=${encodeURIComponent(paymentMethod)}`
+        `/api/pay?pay=${encodeURIComponent(paymentMethod)}`
       );
 
       if (!response.ok) {
