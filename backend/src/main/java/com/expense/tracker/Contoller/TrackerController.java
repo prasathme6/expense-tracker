@@ -3,7 +3,10 @@ package com.expense.tracker.Contoller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +19,7 @@ import com.expense.tracker.dto.ExpenseCategoryResponse;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class TrackerController {
 	
 	@Autowired
@@ -29,6 +33,11 @@ public class TrackerController {
 	@PostMapping("/all")
 	public List<Tracker> postAll(@RequestBody Tracker t){
 		return service.postAll(t);
+	}
+	
+	@DeleteMapping("/del/{id}")
+	public void delExp(@PathVariable Long id) {
+		service.delexp(id);
 	}
 	
 	@GetMapping("/total")

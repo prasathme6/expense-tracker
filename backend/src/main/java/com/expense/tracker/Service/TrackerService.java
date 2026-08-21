@@ -64,4 +64,8 @@ public class TrackerService {
                 expenses
         );
     }
+
+	public void delexp(Long id) {
+		repo.deleteById(id);
+	}
 }
