@@ -1,6 +1,10 @@
 package com.expense.tracker.Entity;
 
-import java.sql.Date;
+
+
+
+
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -20,15 +24,15 @@ public class Tracker {
 	private double amount;
 	private String description;
 	private String category;
-	@JsonFormat(pattern = "dd-MM-yyyy")
-	private Date date;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate date;
 	private String paymentMethod;
 	
 	public Tracker() {
 		super();
 	}
 
-	public Tracker(Long id, double amount, String description, String category, Date date, String paymentMethod) {
+	public Tracker(Long id, double amount, String description, String category, LocalDate date, String paymentMethod) {
 		super();
 		this.id = id;
 		this.amount = amount;
@@ -70,11 +74,11 @@ public class Tracker {
 		this.category = category;
 	}
 
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 
