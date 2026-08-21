@@ -1,8 +1,27 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-function App() {
+const categories = [
+  "travel",
+  "food",
+  "bills",
+  "clothes",
+  "shopping",
+  "entertainment",
+  "health",
+  "education",
+  "other"
+];
 
+const paymentMethods = [
+  "UPI",
+  "cash",
+  "card",
+  "net banking",
+  "other"
+];
+
+function App() {
   const [expenses, setExpenses] = useState([]);
 
   const [form, setForm] = useState({
@@ -17,34 +36,34 @@ function App() {
   const [categoryExpenses, setCategoryExpenses] = useState([]);
   const [categoryTotal, setCategoryTotal] = useState(0);
 
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentExpenses, setPaymentExpenses] = useState([]);
+  const [paymentTotal, setPaymentTotal] = useState(0);
+
   // Get all expenses
   const getExpenses = async () => {
-
     try {
-
       const response = await fetch(
         "http://localhost:8080/api/all"
       );
 
+      if (!response.ok) {
+        throw new Error("Failed to get expenses");
+      }
+
       const data = await response.json();
 
       setExpenses(data);
-
     } catch (error) {
-
       console.error("Error getting expenses:", error);
-
     }
   };
 
-
   // Add expense
   const addExpense = async (e) => {
-
     e.preventDefault();
 
     try {
-
       const response = await fetch(
         "http://localhost:8080/api/all",
         {
@@ -81,20 +100,14 @@ function App() {
       getExpenses();
 
     } catch (error) {
-
       console.error(error);
-
       alert("Failed to add expense");
-
     }
   };
 
-
   // Delete expense
   const deleteExpense = async (id) => {
-
     try {
-
       const response = await fetch(
         `http://localhost:8080/api/del/${id}`,
         {
@@ -110,39 +123,34 @@ function App() {
 
       getExpenses();
 
-      // Refresh category result if a category is selected
       if (category) {
         searchCategory();
       }
 
+      if (paymentMethod) {
+        searchPaymentMethod();
+      }
+
     } catch (error) {
-
       console.error(error);
-
       alert("Failed to delete expense");
-
     }
   };
 
-
-  // Search category
+  // Search by category
   const searchCategory = async () => {
-
-    if (!category.trim()) {
-
-      alert("Please enter a category");
-
+    if (!category) {
+      alert("Please select a category");
       return;
     }
 
     try {
-
       const response = await fetch(
         `http://localhost:8080/api/cat?cat=${encodeURIComponent(category)}`
       );
 
       if (!response.ok) {
-        throw new Error("Failed to get category");
+        throw new Error("Failed to get category expenses");
       }
 
       const data = await response.json();
@@ -151,182 +159,285 @@ function App() {
       setCategoryTotal(data.totalExpense);
 
     } catch (error) {
-
       console.error(error);
-
       alert("Failed to get category expenses");
-
     }
   };
 
-  // Load expenses when page opens
+  // Search by payment method
+  const searchPaymentMethod = async () => {
+    if (!paymentMethod) {
+      alert("Please select a payment method");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/pay?pay=${encodeURIComponent(paymentMethod)}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to get payment method expenses");
+      }
+
+      const data = await response.json();
+
+      setPaymentExpenses(data.expenses);
+      setPaymentTotal(data.totalExpense);
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to get payment method expenses");
+    }
+  };
+
+  // Load all expenses when page opens
   useEffect(() => {
-
     getExpenses();
-
   }, []);
 
-
   return (
-
     <div className="container">
 
-      <h1>Expense Tracker</h1>
+      {/* Header */}
+      <div className="header">
+        <h1>Expense Tracker</h1>
+        <p>Manage and track your daily expenses</p>
+      </div>
 
 
       {/* Add Expense */}
-
       <div className="card">
 
         <h2>Add Expense</h2>
 
-        <form onSubmit={addExpense}>
+        <form onSubmit={addExpense} className="expense-form">
 
-          <input
-            type="number"
-            placeholder="Amount"
-            value={form.amount}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                amount: e.target.value
-              })
-            }
-            required
-          />
+          <div className="form-group">
+            <label>Amount</label>
 
-
-          <input
-            type="text"
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                description: e.target.value
-              })
-            }
-            required
-          />
+            <input
+              type="number"
+              placeholder="Enter amount"
+              min="1"
+              value={form.amount}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  amount: e.target.value
+                })
+              }
+              required
+            />
+          </div>
 
 
-          <input
-            type="text"
-            placeholder="Category"
-            value={form.category}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                category: e.target.value
-              })
-            }
-            required
-          />
+          <div className="form-group">
+            <label>Description</label>
+
+            <input
+              type="text"
+              placeholder="Enter description"
+              value={form.description}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  description: e.target.value
+                })
+              }
+              required
+            />
+          </div>
 
 
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                date: e.target.value
-              })
-            }
-            required
-          />
+          <div className="form-group">
+            <label>Category</label>
+
+            <select
+              value={form.category}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  category: e.target.value
+                })
+              }
+              required
+            >
+              <option value="">
+                Select Category
+              </option>
+
+              {categories.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
 
 
-          <select
-            value={form.paymentMethod}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                paymentMethod: e.target.value
-              })
-            }
-            required
-          >
+          <div className="form-group">
+            <label>Date</label>
 
-            <option value="">
-              Select Payment Method
-            </option>
-
-            <option value="UPI">
-              UPI
-            </option>
-
-            <option value="Cash">
-              Cash
-            </option>
-
-            <option value="Card">
-              Card
-            </option>
-
-          </select>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  date: e.target.value
+                })
+              }
+              required
+            />
+          </div>
 
 
-          <button type="submit">
-            Add Expense
-          </button>
+          <div className="form-group">
+            <label>Payment Method</label>
+
+            <select
+              value={form.paymentMethod}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  paymentMethod: e.target.value
+                })
+              }
+              required
+            >
+              <option value="">
+                Select Payment Method
+              </option>
+
+              {paymentMethods.map((method) => (
+                <option key={method} value={method}>
+                  {method}
+                </option>
+              ))}
+            </select>
+          </div>
+
+
+          <div className="form-button">
+            <button type="submit">
+              + Add Expense
+            </button>
+          </div>
 
         </form>
 
       </div>
 
 
-      {/* Category Search */}
+      {/* Search Section */}
+      <div className="search-grid">
 
-      <div className="card">
+        {/* Category Search */}
+        <div className="card search-card">
 
-        <h2>Search By Category</h2>
+          <h2>Search by Category</h2>
 
-        <div className="category-search">
+          <div className="search-box">
 
-          <input
-            type="text"
-            placeholder="Enter category e.g. travel"
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value)
-            }
-          />
+            <select
+              value={category}
+              onChange={(e) =>
+                setCategory(e.target.value)
+              }
+            >
+              <option value="">
+                Select Category
+              </option>
 
-          <button onClick={searchCategory}>
-            Search
-          </button>
+              {categories.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+
+            <button onClick={searchCategory}>
+              Search
+            </button>
+
+          </div>
 
         </div>
 
 
-        {categoryExpenses.length > 0 && (
+        {/* Payment Search */}
+        <div className="card search-card">
 
-          <div>
+          <h2>Search by Payment Method</h2>
 
-            <h3>
-              Category: {category}
-            </h3>
+          <div className="search-box">
 
-            <h2>
-              Total Expense: ₹{categoryTotal}
-            </h2>
+            <select
+              value={paymentMethod}
+              onChange={(e) =>
+                setPaymentMethod(e.target.value)
+              }
+            >
+              <option value="">
+                Select Payment Method
+              </option>
 
+              {paymentMethods.map((method) => (
+                <option key={method} value={method}>
+                  {method}
+                </option>
+              ))}
+            </select>
+
+            <button onClick={searchPaymentMethod}>
+              Search
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* Category Result */}
+      {category && categoryExpenses.length > 0 && (
+
+        <div className="card result-card">
+
+          <div className="result-header">
+
+            <div>
+              <h2>Category Expenses</h2>
+
+              <p>
+                Showing expenses for{" "}
+                <strong>{category}</strong>
+              </p>
+            </div>
+
+            <div className="total-box">
+              <span>Total Expense</span>
+              <strong>₹{categoryTotal}</strong>
+            </div>
+
+          </div>
+
+
+          <div className="table-container">
 
             <table>
 
               <thead>
-
                 <tr>
                   <th>ID</th>
                   <th>Amount</th>
                   <th>Description</th>
                   <th>Date</th>
-                  <th>Payment</th>
+                  <th>Payment Method</th>
                 </tr>
-
               </thead>
-
 
               <tbody>
 
@@ -336,7 +447,7 @@ function App() {
 
                     <td>{expense.id}</td>
 
-                    <td>
+                    <td className="amount">
                       ₹{expense.amount}
                     </td>
 
@@ -349,7 +460,9 @@ function App() {
                     </td>
 
                     <td>
-                      {expense.paymentMethod}
+                      <span className="badge">
+                        {expense.paymentMethod}
+                      </span>
                     </td>
 
                   </tr>
@@ -362,89 +475,201 @@ function App() {
 
           </div>
 
-        )}
+        </div>
 
-      </div>
+      )}
+
+
+      {/* Payment Method Result */}
+      {paymentMethod && paymentExpenses.length > 0 && (
+
+        <div className="card result-card">
+
+          <div className="result-header">
+
+            <div>
+              <h2>Payment Method Expenses</h2>
+
+              <p>
+                Showing expenses paid using{" "}
+                <strong>{paymentMethod}</strong>
+              </p>
+            </div>
+
+            <div className="total-box">
+              <span>Total Expense</span>
+              <strong>₹{paymentTotal}</strong>
+            </div>
+
+          </div>
+
+
+          <div className="table-container">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Amount</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {paymentExpenses.map((expense) => (
+
+                  <tr key={expense.id}>
+
+                    <td>{expense.id}</td>
+
+                    <td className="amount">
+                      ₹{expense.amount}
+                    </td>
+
+                    <td>
+                      {expense.description}
+                    </td>
+
+                    <td>
+                      {expense.category}
+                    </td>
+
+                    <td>
+                      {expense.date}
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      )}
 
 
       {/* All Expenses */}
-
       <div className="card">
 
-        <h2>All Expenses</h2>
+        <div className="section-header">
 
-        <table>
+          <div>
+            <h2>All Expenses</h2>
+            <p>
+              All your recorded expenses
+            </p>
+          </div>
 
-          <thead>
+          <div className="expense-count">
+            {expenses.length} Expenses
+          </div>
 
-            <tr>
-              <th>ID</th>
-              <th>Amount</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th>Date</th>
-              <th>Payment</th>
-              <th>Action</th>
-            </tr>
-
-          </thead>
+        </div>
 
 
-          <tbody>
+        <div className="table-container">
 
-            {expenses.map((expense) => (
+          <table>
 
-              <tr key={expense.id}>
+            <thead>
 
-                <td>
-                  {expense.id}
-                </td>
-
-                <td>
-                  ₹{expense.amount}
-                </td>
-
-                <td>
-                  {expense.description}
-                </td>
-
-                <td>
-                  {expense.category}
-                </td>
-
-                <td>
-                  {expense.date}
-                </td>
-
-                <td>
-                  {expense.paymentMethod}
-                </td>
-
-                <td>
-
-                  <button
-                    className="delete"
-                    onClick={() =>
-                      deleteExpense(expense.id)
-                    }
-                  >
-                    Delete
-                  </button>
-
-                </td>
-
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Payment Method</th>
+                <th>Action</th>
               </tr>
 
-            ))}
+            </thead>
 
-          </tbody>
 
-        </table>
+            <tbody>
+
+              {expenses.length === 0 ? (
+
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="empty"
+                  >
+                    No expenses found
+                  </td>
+                </tr>
+
+              ) : (
+
+                expenses.map((expense) => (
+
+                  <tr key={expense.id}>
+
+                    <td>
+                      {expense.id}
+                    </td>
+
+                    <td className="amount">
+                      ₹{expense.amount}
+                    </td>
+
+                    <td>
+                      {expense.description}
+                    </td>
+
+                    <td>
+                      <span className="category-badge">
+                        {expense.category}
+                      </span>
+                    </td>
+
+                    <td>
+                      {expense.date}
+                    </td>
+
+                    <td>
+                      <span className="badge">
+                        {expense.paymentMethod}
+                      </span>
+                    </td>
+
+                    <td>
+
+                      <button
+                        className="delete"
+                        onClick={() =>
+                          deleteExpense(expense.id)
+                        }
+                      >
+                        Delete
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
     </div>
-
   );
 }
 
